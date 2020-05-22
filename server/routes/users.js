@@ -1,8 +1,12 @@
 const express = require('express');
 const router = express.Router();
 const { User } = require('../models/User');
-
 const { auth } = require('../middleware/auth');
+const _ = require('lodash');
+const config = require('../config/key');
+const jwt = require('jsonwebtoken');
+const sgMail = require('@sendgrid/mail');
+sgMail.setApiKey(config.SEND_GRID_MAIL_KEY);
 
 //=================================
 //             User

@@ -1,6 +1,8 @@
 /node_modules
 /build
 
+Config.js
+
 dev.js
 
 .DS_Store

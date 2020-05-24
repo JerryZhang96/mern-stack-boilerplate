@@ -1,11 +1,13 @@
 const express = require('express');
 const router = express.Router();
-const { User } = require('../models/User');
-const { auth } = require('../middleware/auth');
 const _ = require('lodash');
+const fetch = require('node-fetch');
 const config = require('../config/key');
 const jwt = require('jsonwebtoken');
 const sgMail = require('@sendgrid/mail');
+const { User } = require('../models/User');
+const { OAuth2Client } = require('google-auth-library');
+const { auth } = require('../middleware/auth');
 sgMail.setApiKey(config.SEND_GRID_MAIL_KEY);
 
 //=================================
@@ -54,6 +56,8 @@ router.post('/login', (req, res) => {
         res.cookie('w_auth', user.token).status(200).json({
           loginSuccess: true,
           userId: user._id,
+          tokenExp: user.tokenExp,
+          token: user.token,
         });
       });
     });
@@ -175,6 +179,125 @@ router.put('/reset-password', (req, res) => {
       });
     });
   }
+});
+
+const client = new OAuth2Client(config.GOOGLE_CLIENT);
+router.post('/google-login', (req, res) => {
+  //Get token from request
+  const { idToken } = req.body;
+
+  // Verify token
+  client
+    .verifyIdToken({ idToken, audience: config.GOOGLE_CLIENT })
+    .then((response) => {
+      const { email_verified, name, email } = response.payload;
+
+      // console.log(response);
+
+      // Check if email verified
+      if (email_verified) {
+        User.findOne({ email }).exec((err, user) => {
+          // Find if this email already exists
+          if (user) {
+            user.generateToken((err, user) => {
+              if (err) return res.status(400).send(err);
+              res.cookie('w_authExp', user.tokenExp);
+              res.cookie('w_auth', user.token).status(200).json({
+                loginSuccess: true,
+                userId: user._id,
+                tokenExp: user.tokenExp,
+                token: user.token,
+              });
+            });
+          } else {
+            // If user does not exist , save it in database and generate password for it
+            let password = email + config.JWT_SECRET;
+            user = new User({ name, email, password });
+            user.save((err, doc) => {
+              if (err) {
+                console.log('Error google login on user save', err);
+                return res.status(400).json({
+                  error: 'User signup failed with google',
+                });
+              }
+              // if no error, generate token
+              user.generateToken((err, user) => {
+                if (err) return res.status(400).send(err);
+                res.cookie('google_authExp', user.tokenExp);
+                res.cookie('google_auth', user.token).status(200).json({
+                  loginSuccess: true,
+                  userId: user._id,
+                  tokenExp: user.tokenExp,
+                  token: user.token,
+                });
+              });
+            });
+          }
+        });
+      } else {
+        // If error
+        return res.status(400).json({
+          error: 'Google login failed. Try again.',
+        });
+      }
+    });
+});
+
+router.post('/facebook-login', (req, res) => {
+  //Get token from request
+  const { userID, accessToken } = req.body;
+  const url = `https://graph.facebook.com/${userID}/?fields=id,name,email&access_token=${accessToken}`;
+
+  return (
+    fetch(url, {
+      method: 'GET',
+    })
+      .then((response) => response.json())
+      // .then((response) => console.log(response))
+      .then((response) => {
+        const { email, name } = response;
+        User.findOne({ email }).exec((err, user) => {
+          if (user) {
+            user.generateToken((err, user) => {
+              if (err) return res.status(400).send(err);
+              res.cookie('w_authExp', user.tokenExp);
+              res.cookie('w_auth', user.token).status(200).json({
+                loginSuccess: true,
+                userId: user._id,
+                tokenExp: user.tokenExp,
+                token: user.token,
+              });
+            });
+          } else {
+            let password = email + process.env.JWT_SECRET;
+            user = new User({ name, email, password });
+            user.save((err, data) => {
+              if (err) {
+                console.log('ERROR FACEBOOK LOGIN ON USER SAVE', err);
+                return res.status(400).json({
+                  error: 'User signup failed with facebook',
+                });
+              }
+              user.generateToken((err, user) => {
+                if (err) return res.status(400).send(err);
+                res.cookie('facebook_authExp', user.tokenExp);
+                res.cookie('facebook_auth', user.token).status(200).json({
+                  loginSuccess: true,
+                  userId: user._id,
+                  tokenExp: user.tokenExp,
+                  token: user.token,
+                });
+              });
+            });
+          }
+        });
+      })
+      .catch((error) => {
+        res.json({
+          error: 'Facebook login failed. Try later',
+        });
+      })
+  );
 });
 
 module.exports = router;

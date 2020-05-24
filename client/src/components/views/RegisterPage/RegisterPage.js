@@ -4,8 +4,8 @@ import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { registerUser } from '../../../_actions/user_actions';
 import { useDispatch } from 'react-redux';
-
-import { Form, Input, Button, message } from 'antd';
+import { Form, Input, Button, message, Typography } from 'antd';
+const { Title } = Typography;
 
 const formItemLayout = {
   labelCol: {
@@ -17,18 +17,18 @@ const formItemLayout = {
     sm: { span: 16 },
   },
 };
-const tailFormItemLayout = {
-  wrapperCol: {
-    xs: {
-      span: 24,
-      offset: 0,
-    },
-    sm: {
-      span: 16,
-      offset: 8,
-    },
-  },
-};
+// const tailFormItemLayout = {
+//   wrapperCol: {
+//     xs: {
+//       span: 24,
+//       offset: 0,
+//     },
+//     sm: {
+//       span: 16,
+//       offset: 8,
+//     },
+//   },
+// };
 
 function RegisterPage(props) {
   const dispatch = useDispatch();
@@ -93,9 +93,9 @@ function RegisterPage(props) {
         } = props;
         return (
           <div className='app'>
-            <h2>Sign up</h2>
-            <Form
-              style={{ minWidth: '375px' }}
+            <Title level={2}>Sign Up</Title>
+            <form
+              style={{ width: '350px' }}
               {...formItemLayout}
               onSubmit={handleSubmit}
             >
@@ -117,7 +117,6 @@ function RegisterPage(props) {
                   <div className='input-feedback'>{errors.name}</div>
                 )}
               </Form.Item>
-
               <Form.Item
                 required
                 label='Email'
@@ -143,7 +142,6 @@ function RegisterPage(props) {
                   <div className='input-feedback'>{errors.email}</div>
                 )}
               </Form.Item>
-
               <Form.Item
                 required
                 label='Password'
@@ -169,7 +167,6 @@ function RegisterPage(props) {
                   <div className='input-feedback'>{errors.password}</div>
                 )}
               </Form.Item>
-
               <Form.Item required label='Confirm' hasFeedback>
                 <Input
                   id='confirmPassword'
@@ -188,17 +185,18 @@ function RegisterPage(props) {
                   <div className='input-feedback'>{errors.confirmPassword}</div>
                 )}
               </Form.Item>
-
-              <Form.Item {...tailFormItemLayout}>
+              <Form.Item>
                 <Button
+                  block
                   onClick={handleSubmit}
                   type='primary'
                   disabled={isSubmitting}
                 >
-                  Submit
+                  Sign Up
                 </Button>
               </Form.Item>
-            </Form>
+              Already have an account?<a href='/login'>&nbsp;Sign in here!</a>
+            </form>
           </div>
         );
       }}

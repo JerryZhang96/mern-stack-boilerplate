@@ -1,10 +1,18 @@
 import React, { useState } from 'react';
 import { withRouter } from 'react-router-dom';
-import { loginUser } from '../../../_actions/user_actions';
+import {
+  loginUser,
+  googleLoginUser,
+  facebookLoginUser,
+} from '../../../_actions/user_actions';
 import { Formik } from 'formik';
 import * as Yup from 'yup';
 import { Form, Icon, Input, Button, Checkbox, Typography } from 'antd';
 import { useDispatch } from 'react-redux';
+import { GoogleLogin } from 'react-google-login';
+import { GOOGLE_CLIENT, FACEBOOK_CLIENT } from '../../Config.js';
+import FacebookLogin from 'react-facebook-login/dist/facebook-login-render-props';
+import { FacebookFilled } from '@ant-design/icons';
 
 const { Title } = Typography;
 
@@ -22,6 +30,60 @@ function LoginPage(props) {
   const initialState = JSON.parse(window.localStorage.getItem('rememberMe'))
     ? JSON.parse(window.localStorage.getItem('rememberMe'))
     : '';
+
+  const sendGoogleToken = (tokenId) => {
+    let dataToSubmit = {
+      idToken: tokenId,
+    };
+    dispatch(googleLoginUser(dataToSubmit))
+      .then((response) => {
+        if (response.payload.loginSuccess) {
+          window.localStorage.setItem('google_token', response.payload.token);
+          window.localStorage.setItem(
+            'google_tokenExp',
+            response.payload.tokenExp
+          );
+          window.localStorage.setItem('userId', response.payload.userId);
+          props.history.push('/');
+        }
+      })
+      .catch((err) => {
+        console.log('Google Sign In Error', err.response);
+        alert('Google Sign In Error', err.response);
+      });
+  };
+
+  const responseGoogle = (response) => {
+    sendGoogleToken(response.tokenId);
+  };
+
+  const sendFacebookToken = (userID, accessToken) => {
+    let dataToSubmit = {
+      userID,
+      accessToken,
+    };
+
+    dispatch(facebookLoginUser(dataToSubmit))
+      .then((response) => {
+        if (response.payload.loginSuccess) {
+          window.localStorage.setItem('facebook_token', response.payload.token);
+          window.localStorage.setItem(
+            'facebook_tokenExp',
+            response.payload.tokenExp
+          );
+          window.localStorage.setItem('userId', response.payload.userId);
+          props.history.push('/');
+        }
+      })
+      .catch((err) => {
+        console.log('Facebook Sign In Error', err.response);
+        alert('Facebook Sign In Error', err.response);
+      });
+  };
+
+  const responseFacebook = (response) => {
+    sendFacebookToken(response.userID, response.accessToken);
+  };
 
   return (
     <Formik
@@ -47,6 +109,11 @@ function LoginPage(props) {
           dispatch(loginUser(dataToSubmit))
             .then((response) => {
               if (response.payload.loginSuccess) {
+                window.localStorage.setItem('x_token', response.payload.token);
+                window.localStorage.setItem(
+                  'x_tokenExp',
+                  response.payload.tokenExp
+                );
                 window.localStorage.setItem('userId', response.payload.userId);
                 if (rememberMe === true) {
                   window.localStorage.setItem(
@@ -108,7 +175,6 @@ function LoginPage(props) {
                   <div className='input-feedback'>{errors.email}</div>
                 )}
               </Form.Item>
-
               <Form.Item required>
                 <Input
                   id='password'
@@ -130,7 +196,6 @@ function LoginPage(props) {
                   <div className='input-feedback'>{errors.password}</div>
                 )}
               </Form.Item>
-
               {formErrorMessage && (
                 <label>
                   <p
@@ -146,7 +211,6 @@ function LoginPage(props) {
                   </p>
                 </label>
               )}
-
               <Form.Item>
                 <Checkbox
                   id='rememberMe'
@@ -166,16 +230,52 @@ function LoginPage(props) {
                   <Button
                     type='primary'
                     htmlType='submit'
-                    className='login-form-button'
                     style={{ minWidth: '100%' }}
                     disabled={isSubmitting}
                     onSubmit={handleSubmit}
                   >
-                    Log in
+                    Login
                   </Button>
                 </div>
-                Or <a href='/register'>Register Now!</a>
               </Form.Item>
+              <div
+                style={{
+                  textAlign: 'center',
+                  fontSize: '15px',
+                  marginBottom: '20px',
+                }}
+              >
+                Or login with
+              </div>
+              <Form.Item>
+                <GoogleLogin
+                  clientId={`${GOOGLE_CLIENT}`}
+                  onSuccess={responseGoogle}
+                  onFailure={responseGoogle}
+                  cookiePolicy={'single_host_origin'}
+                  render={(renderProps) => (
+                    <Button
+                      block
+                      type='danger'
+                      onClick={renderProps.onClick}
+                      disabled={renderProps.disabled}
+                    >
+                      Google
+                    </Button>
+                  )}
+                />
+                <FacebookLogin
+                  appId={`${FACEBOOK_CLIENT}`}
+                  autoLoad={false}
+                  callback={responseFacebook}
+                  render={(renderProps) => (
+                    <Button block type='primary' onClick={renderProps.onClick}>
+                      Facebook
+                    </Button>
+                  )}
+                />
+              </Form.Item>
+              Don't have an account?<a href='/register'>&nbsp;Sign up now!</a>
             </form>
           </div>
         );

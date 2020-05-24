@@ -1,6 +1,8 @@
 import axios from 'axios';
 import {
   LOGIN_USER,
+  GOOGLE_USER,
+  FACEBOOK_USER,
   REGISTER_USER,
   AUTH_USER,
   LOGOUT_USER,
@@ -30,6 +32,29 @@ export function loginUser(dataToSubmit) {
     payload: request,
   };
 }
+
+export function googleLoginUser(dataToSubmit) {
+  const request = axios
+    .post(`${USER_SERVER}/google-login`, dataToSubmit)
+    .then((response) => response.data);
+
+  return {
+    type: GOOGLE_USER,
+    payload: request,
+  };
+}
+
+export function facebookLoginUser(dataToSubmit) {
+  const request = axios
+    .post(`${USER_SERVER}/facebook-login`, dataToSubmit)
+    .then((response) => response.data);
+
+  return {
+    type: FACEBOOK_USER,
+    payload: request,
+  };
+}
+
 export function forgetUser(dataToSubmit) {
   const request = axios
     .put(`${USER_SERVER}/forgot-password`, dataToSubmit)

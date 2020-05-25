@@ -60,7 +60,6 @@ function RegisterPage(props) {
             email: values.email,
             password: values.password,
             name: values.name,
-            // lastname: values.lastname,
             image: `http://gravatar.com/avatar/${moment().unix()}?d=identicon`,
           };
 
@@ -121,9 +120,7 @@ function RegisterPage(props) {
                 required
                 label='Email'
                 hasFeedback
-                validateStatus={
-                  errors.email && touched.email ? 'error' : 'success'
-                }
+                validateStatus={errors.email && touched.email ? 'error' : null}
               >
                 <Input
                   id='email'
@@ -147,7 +144,7 @@ function RegisterPage(props) {
                 label='Password'
                 hasFeedback
                 validateStatus={
-                  errors.password && touched.password ? 'error' : 'success'
+                  errors.password && touched.password ? 'error' : null
                 }
               >
                 <Input

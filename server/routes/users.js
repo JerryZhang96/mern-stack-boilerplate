@@ -223,8 +223,8 @@ router.post('/google-login', (req, res) => {
               // if no error, generate token
               user.generateToken((err, user) => {
                 if (err) return res.status(400).send(err);
-                res.cookie('google_authExp', user.tokenExp);
-                res.cookie('google_auth', user.token).status(200).json({
+                res.cookie('w_authExp', user.tokenExp);
+                res.cookie('w_auth', user.token).status(200).json({
                   loginSuccess: true,
                   userId: user._id,
                   tokenExp: user.tokenExp,
@@ -280,8 +280,8 @@ router.post('/facebook-login', (req, res) => {
               }
               user.generateToken((err, user) => {
                 if (err) return res.status(400).send(err);
-                res.cookie('facebook_authExp', user.tokenExp);
-                res.cookie('facebook_auth', user.token).status(200).json({
+                res.cookie('w_authExp', user.tokenExp);
+                res.cookie('w_auth', user.token).status(200).json({
                   loginSuccess: true,
                   userId: user._id,
                   tokenExp: user.tokenExp,

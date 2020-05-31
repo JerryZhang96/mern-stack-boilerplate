@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { registerUser } from '../../../_actions/user_actions';
 import { useDispatch } from 'react-redux';
 import { Form, Input, Button, message, Typography } from 'antd';
+import { EyeInvisibleOutlined, EyeTwoTone } from '@ant-design/icons';
 const { Title } = Typography;
 
 const formItemLayout = {
@@ -147,12 +148,15 @@ function RegisterPage(props) {
                   errors.password && touched.password ? 'error' : null
                 }
               >
-                <Input
+                <Input.Password
                   id='password'
                   placeholder='Enter your password'
                   type='password'
                   value={values.password}
                   onChange={handleChange}
+                  iconRender={(visible) =>
+                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  }
                   onBlur={handleBlur}
                   className={
                     errors.password && touched.password

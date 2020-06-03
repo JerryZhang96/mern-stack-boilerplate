@@ -9,6 +9,7 @@ import ForgetPage from './views/ForgetPage/ForgetPage.js';
 import ResetPage from './views/ResetPage/ResetPage.js';
 import NavBar from './views/NavBar/NavBar';
 import Footer from './views/Footer/Footer';
+import NotFoundPage from './views/NotFoundPage/NotFoundPage';
 
 //null   Anyone Can go inside
 //true   only logged in user can go inside
@@ -33,6 +34,7 @@ function App() {
             path='/users/password/reset/:token'
             component={Auth(ResetPage, false)}
           />
+          <Route component={Auth(NotFoundPage, null)} />
         </Switch>
       </div>
       <Footer />

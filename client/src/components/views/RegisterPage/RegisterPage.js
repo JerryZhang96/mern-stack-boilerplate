@@ -169,12 +169,15 @@ function RegisterPage(props) {
                 )}
               </Form.Item>
               <Form.Item required label='Confirm' hasFeedback>
-                <Input
+                <Input.Password
                   id='confirmPassword'
                   placeholder='Enter your confirm password'
                   type='password'
                   value={values.confirmPassword}
                   onChange={handleChange}
+                  iconRender={(visible) =>
+                    visible ? <EyeTwoTone /> : <EyeInvisibleOutlined />
+                  }
                   onBlur={handleBlur}
                   className={
                     errors.confirmPassword && touched.confirmPassword
